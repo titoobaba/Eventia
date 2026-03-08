@@ -1,125 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<title>EVENTIA</title>
-
-<link rel="stylesheet" href="style.css">
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Event Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
+<body class="bg-gray-50 text-gray-900">
+    <nav class="bg-blue-600 p-4 text-white shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold">CampusEvents Pro</h1>
+            <button onclick="toggleModal()" class="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100">+ Create Event</button>
+        </div>
+    </nav>
 
-<body>
+    <main class="container mx-auto p-6">
+        <h2 class="text-3xl font-bold mb-6">Upcoming Events</h2>
+        <div id="event-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            </div>
+    </main>
 
-<!-- NAVBAR -->
+    <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-xl w-full max-w-md">
+            <h2 class="text-xl font-bold mb-4">Add New Event</h2>
+            <input id="title" type="text" placeholder="Event Title" class="w-full border p-2 mb-3 rounded">
+            <input id="date" type="date" class="w-full border p-2 mb-3 rounded">
+            <input id="venue" type="text" placeholder="Venue" class="w-full border p-2 mb-3 rounded">
+            <textarea id="desc" placeholder="Description" class="w-full border p-2 mb-4 rounded"></textarea>
+            <div class="flex justify-end gap-2">
+                <button onclick="toggleModal()" class="text-gray-500 px-4">Cancel</button>
+                <button onclick="saveEvent()" class="bg-blue-600 text-white px-6 py-2 rounded">Save</button>
+            </div>
+        </div>
+    </div>
 
-<nav class="navbar">
+    <script>
+        async function fetchEvents() {
+            const res = await fetch('/api/events');
+            const data = await res.json();
+            const grid = document.getElementById('event-grid');
+            grid.innerHTML = data.map(ev => `
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                    <span class="text-blue-600 text-sm font-bold uppercase">${ev.date}</span>
+                    <h3 class="text-xl font-bold mt-1">${ev.title}</h3>
+                    <p class="text-gray-600 mt-2">${ev.description}</p>
+                    <div class="mt-4 flex items-center text-gray-500 text-sm">
+                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"/></svg>
+                        ${ev.venue}
+                    </div>
+                </div>
+            `).join('');
+        }
 
-<div class="logo">EVENTIA</div>
+        function toggleModal() {
+            document.getElementById('modal').classList.toggle('hidden');
+        }
 
-<ul class="nav-links">
-<li>Home</li>
-<li>Campus Events</li>
-<li>Founders Day</li>
-<li>Campus Map</li>
-<li>Upcoming Events</li>
-<li>Leaderboard</li>
-</ul>
+        async function saveEvent() {
+            const body = {
+                title: document.getElementById('title').value,
+                date: document.getElementById('date').value,
+                venue: document.getElementById('venue').value,
+                description: document.getElementById('desc').value
+            };
+            await fetch('/api/events', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            toggleModal();
+            fetchEvents();
+        }
 
-<div class="nav-right">
-
-<button class="bell">🔔</button>
-
-<button id="darkToggle">🌙</button>
-
-<img class="avatar" src="https://i.pravatar.cc/40">
-
-<button class="create-btn">Create Event</button>
-
-</div>
-
-</nav>
-
-<!-- HERO -->
-
-<section class="hero">
-
-<h1>Discover Campus Events Like Never Before</h1>
-
-<p>
-Explore, register, and participate in events happening across your campus.
-</p>
-
-<div class="hero-buttons">
-
-<button class="primary">Explore Events</button>
-
-<button class="secondary">Campus Map</button>
-
-</div>
-
-<div class="countdown">
-
-<h3>Next Event Starts In</h3>
-
-<div id="timer"></div>
-
-</div>
-
-</section>
-
-<!-- EVENTS -->
-
-<section class="events">
-
-<h2>Campus Events</h2>
-
-<div class="event-grid">
-
-<div class="event-card">
-
-<h3>AI Workshop</h3>
-
-<p>Feb 25 • Seminar Hall</p>
-
-<button>Register</button>
-
-</div>
-
-<div class="event-card">
-
-<h3>Hackathon</h3>
-
-<p>Feb 27 • Tech Lab</p>
-
-<button>Register</button>
-
-</div>
-
-<div class="event-card">
-
-<h3>Cultural Night</h3>
-
-<p>March 2 • Auditorium</p>
-
-<button>Register</button>
-
-</div>
-
-</div>
-
-</section>
-
-<!-- FLOATING CREATE BUTTON -->
-
-<button class="floating">+</button>
-
-<script src="app.js"></script>
-
+        fetchEvents();
+    </script>
 </body>
 </html>
